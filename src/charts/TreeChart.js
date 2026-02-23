@@ -128,7 +128,38 @@ function TreeChartCore(
     .data(descendants)
     .join('a')
     .attr('transform', d => `translate(${d.y},${d.x})`)
+function addRelativeClicked(event, d) {
+  event.stopPropagation()
+  event.preventDefault()
+  dispatchEvent(
+    new CustomEvent('pedigree:add-relative', {
+      bubbles: true,
+      composed: true,
+      detail: { grampsId: d.data?.person?.gramps_id },
+    })
+  )
+}
 
+// "+" button on each person node
+node
+  .append('circle')
+  .filter(d => d.data?.person?.gramps_id) // only real people
+  .attr('cx', boxWidth / 2 - 14)
+  .attr('cy', -boxHeight / 2 + 14)
+  .attr('r', 10)
+  .attr('fill', 'var(--grampsjs-color-primary, #2b6cb0)')
+  .style('cursor', 'pointer')
+  .on('click', addRelativeClicked)
+
+node
+  .append('text')
+  .filter(d => d.data?.person?.gramps_id)
+  .attr('x', boxWidth / 2 - 18)
+  .attr('y', -boxHeight / 2 + 18)
+  .attr('font-size', 16)
+  .attr('fill', 'white')
+  .style('pointer-events', 'none')
+  .text('+')
   node
     .append('rect')
     .filter(d => d.data.person)
