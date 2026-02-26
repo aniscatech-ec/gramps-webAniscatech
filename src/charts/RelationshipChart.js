@@ -553,22 +553,21 @@ function remasterChart(
     }
     // we replace the polyline with a smooth connector from start to end
     edges
-      .append('path')
-      .attr('class', 'edge')
-      .attr('d', () => {
-  const x1 = firstAndLastPoint[0][0]
-  const y1 = firstAndLastPoint[0][1]
-  const x2 = firstAndLastPoint[1][0]
-  const y2 = firstAndLastPoint[1][1]
+  .append('path')
+  .attr('class', 'edge')
+  .attr('d', () => {
+    const x1 = firstAndLastPoint[0][0]
+    const y1 = firstAndLastPoint[0][1]
+    const x2 = firstAndLastPoint[1][0]
+    const y2 = firstAndLastPoint[1][1]
 
-  const yMid = (y1 + y2) / 2
+    const yMid = (y1 + y2) / 2
 
-  return `M${x1},${y1} L${x1},${yMid} L${x2},${yMid} L${x2},${y2}`
-}
-      )
-      .attr('fill', 'none')
-      .attr('stroke', 'var(--grampsjs-body-font-color-40)')
-      .attr('stroke-width', 1)
+    return `M${x1},${y1}L${x1},${yMid}L${x2},${yMid}L${x2},${y2}`
+  })
+  .attr('fill', 'none')
+  .attr('stroke', 'var(--grampsjs-body-font-color-40)')
+  .attr('stroke-width', 1)
   })
   // edges.selectAll('path').attr('stroke-opacity', '0.4')
 
