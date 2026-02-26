@@ -555,12 +555,16 @@ function remasterChart(
     edges
       .append('path')
       .attr('class', 'edge')
-      .attr(
-        'd',
-        linkGenerator({
-          source: {x: firstAndLastPoint[0][0], y: firstAndLastPoint[0][1]},
-          target: {x: firstAndLastPoint[1][0], y: firstAndLastPoint[1][1]},
-        })
+      .attr('d', () => {
+  const x1 = firstAndLastPoint[0][0]
+  const y1 = firstAndLastPoint[0][1]
+  const x2 = firstAndLastPoint[1][0]
+  const y2 = firstAndLastPoint[1][1]
+
+  const yMid = (y1 + y2) / 2
+
+  return `M${x1},${y1} L${x1},${yMid} L${x2},${yMid} L${x2},${y2}`
+}
       )
       .attr('fill', 'none')
       .attr('stroke', 'var(--grampsjs-body-font-color-40)')
