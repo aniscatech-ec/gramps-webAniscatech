@@ -123,22 +123,22 @@ class GrampsjsFormRegister extends GrampsjsAppStateMixin(LitElement) {
             ></md-outlined-text-field>
 
             <!-- Campos extra (solo visual, no afectan el registro) -->
-            <md-outlined-text-field
+              <md-outlined-text-field
               outlined
               id="phone"
-              label="${this._('Phone Number')}"
+              label="Número de teléfono"
               type="tel"
             ></md-outlined-text-field>
             <md-outlined-text-field
               outlined
               id="fathername"
-              label="${this._("Father's Name")}"
+              label="Nombre del padre"
               type="text"
             ></md-outlined-text-field>
             <md-outlined-text-field
               outlined
               id="mothername"
-              label="${this._("Mother's Name")}"
+              label="Nombre de la madre"
               type="text"
             ></md-outlined-text-field>
 
