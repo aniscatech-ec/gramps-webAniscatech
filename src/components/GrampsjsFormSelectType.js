@@ -174,7 +174,7 @@ class GrampsjsFormSelectType extends GrampsjsAppStateMixin(LitElement) {
     `
   }
 
-    getTypes(nonLocal = true) {
+  getTypes(nonLocal = true) {
     const types = nonLocal ? this.types : this.typesLocale
     const defaultTypesAll = types?.default || {}
     const customTypesAll = types?.custom || {}
@@ -184,14 +184,7 @@ class GrampsjsFormSelectType extends GrampsjsAppStateMixin(LitElement) {
       this.typeNameCustom || this.typeName in customTypesAll
         ? customTypesAll[this.typeNameCustom || this.typeName]
         : []
-    const all = defaultTypes.concat(customTypes)
-
-    // 👇 TEMPORAL: SOLO PARA VER QUÉ LLEGA EN PERSONAS
-    if (this.typeNameCustom === 'person_attribute_types') {
-      console.log('PERSON TYPES (raw):', all)
-    }
-
-    return all
+    return defaultTypes.concat(customTypes)
   }
 
   #toggleCustomType() {
