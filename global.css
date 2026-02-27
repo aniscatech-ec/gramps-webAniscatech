@@ -344,3 +344,112 @@ main,
 }
 
 /* TEST-GEO-123 */
+/* =========================
+   LIGHT THEME (FIX ALL UI)
+   ========================= */
+:root[data-theme='light'] {
+  /* Base */
+  --md-sys-color-background: #ffffff;
+  --md-sys-color-on-background: #111827;
+
+  /* Surfaces (cards, menus, panels) */
+  --md-sys-color-surface: #ffffff;
+  --md-sys-color-on-surface: #111827;
+  --md-sys-color-surface-variant: #f3f4f6;
+  --md-sys-color-on-surface-variant: #374151;
+
+  /* Outline / dividers */
+  --md-sys-color-outline: #d1d5db;
+  --md-sys-color-outline-variant: #e5e7eb;
+
+  /* Primary (toolbar accent) */
+  --md-sys-color-primary: #6d28d9;
+  /* morado */
+  --md-sys-color-on-primary: #ffffff;
+  --md-sys-color-primary-container: #ede9fe;
+  --md-sys-color-on-primary-container: #2e1065;
+
+  /* Secondary */
+  --md-sys-color-secondary: #2563eb;
+  /* azul */
+  --md-sys-color-on-secondary: #ffffff;
+  --md-sys-color-secondary-container: #dbeafe;
+  --md-sys-color-on-secondary-container: #1e3a8a;
+
+  /* Error */
+  --md-sys-color-error: #dc2626;
+  --md-sys-color-on-error: #ffffff;
+  --md-sys-color-error-container: #fee2e2;
+  --md-sys-color-on-error-container: #7f1d1d;
+
+  /* Links */
+  --grampsjs-color-link-font: #1d4ed8;
+  --grampsjs-color-link-hover: #1e40af;
+
+  /* Icons & text */
+  --grampsjs-color-icon-default: rgba(17, 24, 39, 0.75);
+  --grampsjs-color-icon-selected: rgba(17, 24, 39, 0.95);
+  --grampsjs-color-drawer-text: rgba(17, 24, 39, 0.85);
+
+  /* Loading / skeleton */
+  --grampsjs-color-skeleton-background: rgba(17, 24, 39, 0.06);
+  --grampsjs-color-skeleton-base: rgba(17, 24, 39, 0.10);
+  --grampsjs-color-skeleton-shine: rgba(17, 24, 39, 0.14);
+
+  /* Map marker */
+  --grampsjs-color-map-marker-color: #111827;
+
+  /* Revisions (keep readable) */
+  --grampsjs-color-revision-deleted-background-red: rgba(220, 38, 38, 0.12);
+  --grampsjs-color-revision-added-background-green: rgba(34, 197, 94, 0.12);
+  --grampsjs-color-revision-moved-background-blue: rgba(59, 130, 246, 0.10);
+  --grampsjs-color-revision-moved-font: rgba(17, 24, 39, 0.85);
+  --grampsjs-color-revision-error-background: rgba(220, 38, 38, 0.14);
+  --grampsjs-color-revision-error-font: #7f1d1d;
+
+  /* Tree connectors */
+  --grampsjs-color-ytree-default-person-icon-background: #f3f4f6;
+  --grampsjs-color-ytree-expand-background: #f3f4f6;
+  --grampsjs-color-ytree-expand-font: rgba(17, 24, 39, 0.85);
+}
+
+/* Force general readability on light */
+:root[data-theme='light'] body {
+  color: var(--md-sys-color-on-background);
+  background: var(--md-sys-color-background);
+}
+
+/* Sidebar/menu items */
+:root[data-theme='light'] .mdc-drawer,
+:root[data-theme='light'] .mdc-drawer__content {
+  background: #ffffff;
+}
+
+:root[data-theme='light'] .mdc-list-item__primary-text,
+:root[data-theme='light'] .mdc-list-item__graphic,
+:root[data-theme='light'] .mdc-icon-button,
+:root[data-theme='light'] .material-icons,
+:root[data-theme='light'] .material-icons-outlined {
+  color: var(--grampsjs-color-icon-default);
+}
+
+/* Cards / person boxes: make text readable */
+:root[data-theme='light'] .person-card,
+:root[data-theme='light'] .gramps-card,
+:root[data-theme='light'] .mdc-card {
+  color: var(--md-sys-color-on-surface);
+}
+
+/* SVG lines/connectors (your tree/relationship charts) */
+:root[data-theme='light'] svg .edge,
+:root[data-theme='light'] svg path.edge,
+:root[data-theme='light'] svg path.link,
+:root[data-theme='light'] svg line,
+:root[data-theme='light'] svg path {
+  stroke: rgba(17, 24, 39, 0.35) !important;
+}
+
+/* If some lines are still too faint, bump slightly */
+:root[data-theme='light'] svg path.edge {
+  stroke-width: 1.2 !important;
+}

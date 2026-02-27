@@ -9,5 +9,5 @@ export function getCurrentTheme(theme) {
 }
 
 export function applyTheme(theme) {
-  document.documentElement.setAttribute('data-theme', getCurrentTheme(theme))
+  document.documentElement.setAttribute('data-theme', "light")
 }
