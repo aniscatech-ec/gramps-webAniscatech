@@ -121,6 +121,27 @@ class GrampsjsFormRegister extends GrampsjsAppStateMixin(LitElement) {
               label="${this._('Full Name')}"
               type="text"
             ></md-outlined-text-field>
+
+            <!-- Campos extra (solo visual, no afectan el registro) -->
+            <md-outlined-text-field
+              outlined
+              id="phone"
+              label="${this._('Phone Number')}"
+              type="tel"
+            ></md-outlined-text-field>
+            <md-outlined-text-field
+              outlined
+              id="fathername"
+              label="${this._("Father's Name")}"
+              type="text"
+            ></md-outlined-text-field>
+            <md-outlined-text-field
+              outlined
+              id="mothername"
+              label="${this._("Mother's Name")}"
+              type="text"
+            ></md-outlined-text-field>
+
             <mwc-button
               raised
               label="${this._('Register new account')}"
@@ -170,7 +191,6 @@ class GrampsjsFormRegister extends GrampsjsAppStateMixin(LitElement) {
   _handlePasswordInput() {
     const pwField = this.shadowRoot.getElementById('password')
     const pw2Field = this.shadowRoot.getElementById('password2')
-    // Only update if pw2Field has been set
     if (pw2Field.value !== '') {
       pw2Field.error = pwField.value !== pw2Field.value
       this._checkFormValid()
@@ -180,7 +200,6 @@ class GrampsjsFormRegister extends GrampsjsAppStateMixin(LitElement) {
   _handleConfirmPasswordInput() {
     const pwField = this.shadowRoot.getElementById('password')
     const pw2Field = this.shadowRoot.getElementById('password2')
-    // Set error attribute if passwords do not match
     pw2Field.error = pwField.value !== pw2Field.value
     this._checkFormValid()
   }
@@ -188,14 +207,12 @@ class GrampsjsFormRegister extends GrampsjsAppStateMixin(LitElement) {
   handleEmailInput(e) {
     this.email = e.target.value
     this.validateEmail()
-    // call check async
     setTimeout(() => {
       this._checkFormValid()
     }, 0)
   }
 
   validateEmail() {
-    // using email pattern from https://emailregex.com/
     const emailPattern =
       /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
     this.emailError = emailPattern.test(this.email)
@@ -204,10 +221,12 @@ class GrampsjsFormRegister extends GrampsjsAppStateMixin(LitElement) {
   }
 
   _checkFormValid() {
-    const mdFields = Array.from(
-      this.shadowRoot.querySelectorAll('md-outlined-text-field')
-    )
-    // form is valid if all fields are valid
+    // Solo valida los campos requeridos originales, ignora los campos extra
+    const requiredIds = ['username', 'password', 'password2', 'email', 'fullname']
+    const mdFields = requiredIds
+      .map(id => this.shadowRoot.getElementById(id))
+      .filter(Boolean)
+
     this.isFormValid = mdFields.every(
       field => field.validity.valid && !field.error
     )
@@ -222,6 +241,8 @@ class GrampsjsFormRegister extends GrampsjsAppStateMixin(LitElement) {
     const emailField = this.shadowRoot.getElementById('email')
     const nameField = this.shadowRoot.getElementById('fullname')
     const tree = this.tree || ''
+
+    // Se llama exactamente igual que antes, los campos extra no se envian
     const res = await apiRegisterUser(
       userField.value,
       pwField.value,
