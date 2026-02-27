@@ -10,6 +10,8 @@ import './GrampsjsViewTreeChart.js'
 import './GrampsjsViewHourglassChart.js'
 import './GrampsjsViewFanChart.js'
 import './GrampsjsViewRelationshipChart.js'
+import '../components/GrampsjsPersonSidebar.js'
+
 import {fireEvent} from '../util.js'
 import {
   chartFanIconPath,
@@ -44,10 +46,13 @@ export class GrampsjsViewTree extends GrampsjsView {
 
   static get properties() {
     return {
+      ...super.properties,
       grampsId: {type: String},
       view: {type: String},
       _history: {type: Array},
       _currentTabId: {type: Number},
+      _selectedPersonId: {type: String},
+    _sidebarOpen: {type: Boolean},
     }
   }
 
@@ -57,6 +62,8 @@ export class GrampsjsViewTree extends GrampsjsView {
     this.view = 'ancestor'
     this._history = this.grampsId ? [this.grampsId] : []
     this._currentTabId = 0
+    this._selectedPersonId = ''
+  this._sidebarOpen = false
   }
 
   renderContent() {
@@ -71,14 +78,24 @@ export class GrampsjsViewTree extends GrampsjsView {
       `
     }
     return html`
-      <div id="tabs">${this.renderTabs()}</div>
-      ${this._currentTabId === 0 ? this._renderPedigree() : ''}
-      ${this._currentTabId === 1 ? this._renderDescendantTree() : ''}
-      ${this._currentTabId === 2 ? this._renderHourglassTree() : ''}
-      ${this._currentTabId === 3 ? this._renderRelationshipChart() : ''}
-      ${this._currentTabId === 4 ? this._renderFan() : ''}
-    `
-  }
+    <div class="tree-wrapper">           // ← wrappear en este div
+      <div class="tree-content ${this._sidebarOpen ? 'sidebar-open' : ''}">
+        <div id="tabs">${this.renderTabs()}</div>
+        ${this._currentTabId === 0 ? this._renderPedigree() : ''}
+        ${this._currentTabId === 1 ? this._renderDescendantTree() : ''}
+        ${this._currentTabId === 2 ? this._renderHourglassTree() : ''}
+        ${this._currentTabId === 3 ? this._renderRelationshipChart() : ''}
+        ${this._currentTabId === 4 ? this._renderFan() : ''}
+      </div>
+
+      <grampsjs-person-sidebar          // ← agregar el sidebar aquí
+        .grampsId="${this._selectedPersonId}"
+        .open="${this._sidebarOpen}"
+        @sidebar-closed="${() => { this._sidebarOpen = false }}"
+      ></grampsjs-person-sidebar>
+    </div>
+  `
+}
 
   renderTabs() {
     return html`
@@ -232,8 +249,7 @@ export class GrampsjsViewTree extends GrampsjsView {
       </grampsjs-view-hourglass-chart>
     `
   }
-
-  _prevPerson() {
+    _prevPerson() {
     this._history.pop()
     this.grampsId = this._history.pop()
   }
@@ -245,18 +261,18 @@ export class GrampsjsViewTree extends GrampsjsView {
   _goToPerson() {
     fireEvent(this, 'nav', {path: `person/${this.grampsId}`})
   }
-
+_openSidebar(event) {
+  const {grampsId} = event.detail || {}
+  if (!grampsId) return
+  this._selectedPersonId = grampsId
+  this._sidebarOpen = true
+}
   connectedCallback() {
-    super.connectedCallback()
-    window.addEventListener(
-      'pedigree:person-selected',
-      this._selectPerson.bind(this)
-    )
-    window.addEventListener(
-    'pedigree:add-relative',
-    this._addRelative.bind(this)
-  )
-  }
+  super.connectedCallback()
+  window.addEventListener('pedigree:person-selected', this._selectPerson.bind(this))
+  window.addEventListener('pedigree:add-relative', this._addRelative.bind(this))
+  window.addEventListener('pedigree:open-sidebar', this._openSidebar.bind(this))  // ← NUEVO
+}
 
   update(changed) {
     super.update(changed)
@@ -276,6 +292,7 @@ export class GrampsjsViewTree extends GrampsjsView {
   if (!grampsId) return
   fireEvent(this, 'nav', { path: `new_family?from=${encodeURIComponent(grampsId)}` })
 }
+
 }
 
 window.customElements.define('grampsjs-view-tree', GrampsjsViewTree)
