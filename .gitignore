@@ -20,3 +20,4 @@
 /_site/
 /dist/
 /out-tsc/
+!global.css
