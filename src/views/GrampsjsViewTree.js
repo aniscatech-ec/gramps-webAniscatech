@@ -252,6 +252,10 @@ export class GrampsjsViewTree extends GrampsjsView {
       'pedigree:person-selected',
       this._selectPerson.bind(this)
     )
+    window.addEventListener(
+    'pedigree:add-relative',
+    this._addRelative.bind(this)
+  )
   }
 
   update(changed) {
@@ -267,6 +271,11 @@ export class GrampsjsViewTree extends GrampsjsView {
     const {grampsId} = event.detail
     this.grampsId = grampsId
   }
+  _addRelative(event) {
+  const { grampsId } = event.detail || {}
+  if (!grampsId) return
+  fireEvent(this, 'nav', { path: `new_family?from=${encodeURIComponent(grampsId)}` })
+}
 }
 
 window.customElements.define('grampsjs-view-tree', GrampsjsViewTree)
