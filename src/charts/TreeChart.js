@@ -1,5 +1,5 @@
 import {min, max} from 'd3-array'
-import {create} from 'd3-selection'
+import {create, select, selectAll} from 'd3-selection'
 import {hierarchy, tree} from 'd3-hierarchy'
 import {curveBumpX, link, symbolTriangle, symbol} from 'd3-shape'
 import {zoom} from 'd3-zoom'
@@ -161,30 +161,49 @@ node
   .style('pointer-events', 'none')
   .text('+')
   node
-    .append('rect')
-    .filter(d => d.data.person)
-    .attr('fill', d =>
-      d.data?.person?.gender === 0 ? 'var(--color-girl)' : 'var(--color-boy)'
-    )
-    .attr('width', 24)
-    .attr('height', boxHeight - 1)
-    .attr('rx', 12)
-    .attr('ry', 12)
-    .attr(
-      'transform',
-      `translate(${-boxWidth / 2 - 4},${-boxHeight / 2 + 0.5})`
-    )
-    .attr('id', d => d.data.id) // Unique id for each rect
+     .append('rect')
+  .filter(d => d.data.person)
+  .attr('fill', 'var(--grampsjs-color-shade-230)')
+  .attr('width', boxWidth)
+  .attr('height', boxHeight)
+  .attr('rx', 8)
+  .attr('ry', 8)
+  .attr('transform', `translate(${-boxWidth / 2},${-boxHeight / 2})`)
+  .attr('id', d => d.data.id)
+  .attr('class', 'person-card-rect')
 
   function clicked(event, d) {
-    dispatchEvent(
-      new CustomEvent('pedigree:person-selected', {
-        bubbles: true,
-        composed: true,
-        detail: {grampsId: d.data?.person?.gramps_id},
-      })
-    )
-  }
+  // Reset todas las cards
+  svgParent.selectAll('.person-card-rect')
+    .attr('fill', 'var(--grampsjs-color-shade-230)')
+    .attr('stroke', null)
+    .attr('stroke-width', null)
+
+  // Highlight la seleccionada
+  svgParent.selectAll('.person-card-rect')
+    .filter(dd => dd.data?.person?.gramps_id === d.data?.person?.gramps_id)
+    .attr('fill', '#DBEAFE')
+    .attr('stroke', '#2563EB')
+    .attr('stroke-width', 2)
+
+  // Evento original para navegación
+  dispatchEvent(
+    new CustomEvent('pedigree:person-selected', {
+      bubbles: true,
+      composed: true,
+      detail: {grampsId: d.data?.person?.gramps_id},
+    })
+  )
+
+  // Evento NUEVO para el sidebar
+  dispatchEvent(
+    new CustomEvent('pedigree:open-sidebar', {
+      bubbles: true,
+      composed: true,
+      detail: {grampsId: d.data?.person?.gramps_id},
+    })
+  )
+}
 
   node
     .append('rect')
