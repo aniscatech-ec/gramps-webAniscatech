@@ -40,6 +40,20 @@ export class GrampsjsViewTree extends GrampsjsView {
         #tabs {
           height: 85px;
         }
+          .tree-wrapper {
+    display: flex;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+  }
+  .tree-content {
+    flex: 1;
+    overflow: hidden;
+    transition: margin-right 0.3s ease;
+  }
+  .tree-content.sidebar-open {
+    margin-right: 380px;
+  }
       `,
     ]
   }
