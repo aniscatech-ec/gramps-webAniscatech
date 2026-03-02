@@ -173,36 +173,21 @@ node
   .attr('class', 'person-card-rect')
 
   function clicked(event, d) {
-  // Reset todas las cards
+  // reset stroke a todas
   svgParent.selectAll('.person-card-rect')
-    .attr('fill', 'var(--grampsjs-color-shade-230)')
-    .attr('stroke', null)
-    .attr('stroke-width', null)
+    .attr('stroke', 'transparent')
+    .attr('stroke-width', 0);
 
-  // Highlight la seleccionada
-  svgParent.selectAll('.person-card-rect')
-    .filter(dd => dd.data?.person?.gramps_id === d.data?.person?.gramps_id)
-    .attr('fill', '#DBEAFE')
-    .attr('stroke', '#2563EB')
-    .attr('stroke-width', 2)
+  // stroke a la seleccionada
+  select(this).select('.person-card-rect')
+    .attr('stroke', 'var(--grampsjs-color-primary, #6d28d9)')
+    .attr('stroke-width', 3);
 
-  // Evento original para navegación
-  dispatchEvent(
-    new CustomEvent('pedigree:person-selected', {
-      bubbles: true,
-      composed: true,
-      detail: {grampsId: d.data?.person?.gramps_id},
-    })
-  )
-
-  // Evento NUEVO para el sidebar
-  dispatchEvent(
-    new CustomEvent('pedigree:open-sidebar', {
-      bubbles: true,
-      composed: true,
-      detail: {grampsId: d.data?.person?.gramps_id},
-    })
-  )
+  dispatchEvent(new CustomEvent('pedigree:person-selected', {
+    bubbles: true,
+    composed: true,
+    detail: { grampsId: d.data?.person?.gramps_id || d.data?.person?.grampsId }
+  }));
 }
 
   node

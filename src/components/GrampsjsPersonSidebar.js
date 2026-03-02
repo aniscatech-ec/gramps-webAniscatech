@@ -194,19 +194,41 @@ export class GrampsjsPersonSidebar extends LitElement {
   }
 
   async _fetchPerson() {
-    this._loading = true
-    this._personData = null
-    try {
-      // Fetch por grampsId o handle según tu API
-      const data = await apiGet(`/api/people/?gramps_id=${this.grampsId}&extend=all`)
-      if (data && data.length > 0) {
-        this._personData = data[0]
-      }
-    } catch(e) {
-      console.error('Error fetching person:', e)
+  this._loading = true
+  this._personData = null
+
+  try {
+    const resp = await apiGet(`/api/people/?gramps_id=${this.grampsId}&extend=all`)
+
+    if (!resp || resp.error) {
+      console.error('Error fetching person:', resp?.error)
+      this._loading = false
+      return
     }
-    this._loading = false
+
+    const payload = resp.data
+
+    const list =
+      Array.isArray(payload) ? payload :
+      Array.isArray(payload?.data) ? payload.data :
+      Array.isArray(payload?.results) ? payload.results :
+      []
+
+    if (list.length > 0) {
+      this._personData = list[0]
+    }
+  } catch (e) {
+    console.error('Error fetching person:', e)
   }
+
+  this._loading = false
+}
+
+_goToProfile() {
+  const id = this._personData?.gramps_id || this.grampsId
+  if (!id) return
+  window.location.href = `/person/${id}`
+}
 
   _getFullName(person) {
     if (!person?.primary_name) return 'Sin nombre'
@@ -234,11 +256,10 @@ export class GrampsjsPersonSidebar extends LitElement {
   }
 
   _goToProfile() {
-    if (!this._personData) return
-    window.dispatchEvent(new CustomEvent('grampsjs:nav', {
-      detail: {path: `/person/${this._personData.gramps_id}`}
-    }))
-  }
+  const id = this._personData?.gramps_id || this.grampsId
+  if (!id) return
+  window.location.href = `/person/${id}`
+}
 
   render() {
     return html`
