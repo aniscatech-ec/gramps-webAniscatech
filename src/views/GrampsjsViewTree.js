@@ -25,36 +25,39 @@ export class GrampsjsViewTree extends GrampsjsView {
     return [
       super.styles,
       css`
-        .with-margin {
-          margin: 25px 40px;
-        }
+  .with-margin {
+    margin: 25px 40px;
+  }
 
-        md-primary-tab {
-          opacity: 0.8;
-        }
+  md-primary-tab {
+    opacity: 0.8;
+  }
 
-        md-primary-tab[active] {
-          opacity: 1;
-        }
+  md-primary-tab[active] {
+    opacity: 1;
+  }
 
-        #tabs {
-          height: 85px;
-        }
-          .tree-wrapper {
+  #tabs {
+    height: 85px;
+  }
+
+  .tree-wrapper {
     display: flex;
     height: 100%;
     position: relative;
     overflow: hidden;
   }
+
   .tree-content {
     flex: 1;
     overflow: hidden;
     transition: margin-right 0.3s ease;
   }
+
   .tree-content.sidebar-open {
     margin-right: 380px;
   }
-      `,
+`
     ]
   }
 
@@ -71,14 +74,19 @@ export class GrampsjsViewTree extends GrampsjsView {
   }
 
   constructor() {
-    super()
-    this.grampsId = ''
-    this.view = 'ancestor'
-    this._history = this.grampsId ? [this.grampsId] : []
-    this._currentTabId = 0
-    this._selectedPersonId = ''
+  super()
+  this.grampsId = ''
+  this.view = 'ancestor'
+  this._history = this.grampsId ? [this.grampsId] : []
+  this._currentTabId = 0
+  this._selectedPersonId = ''
   this._sidebarOpen = false
-  }
+
+  // bind una sola vez
+  this._onSelectPerson = this._selectPerson.bind(this)
+  this._onAddRelative = this._addRelative.bind(this)
+  this._onOpenSidebar = this._openSidebar.bind(this)
+}
 
   renderContent() {
     if (this.grampsId === '') {
@@ -92,7 +100,7 @@ export class GrampsjsViewTree extends GrampsjsView {
       `
     }
     return html`
-    <div class="tree-wrapper">           // ← wrappear en este div
+    <div class="tree-wrapper">
       <div class="tree-content ${this._sidebarOpen ? 'sidebar-open' : ''}">
         <div id="tabs">${this.renderTabs()}</div>
         ${this._currentTabId === 0 ? this._renderPedigree() : ''}
@@ -102,7 +110,7 @@ export class GrampsjsViewTree extends GrampsjsView {
         ${this._currentTabId === 4 ? this._renderFan() : ''}
       </div>
 
-      <grampsjs-person-sidebar          // ← agregar el sidebar aquí
+      <grampsjs-person-sidebar
         .grampsId="${this._selectedPersonId}"
         .open="${this._sidebarOpen}"
         @sidebar-closed="${() => { this._sidebarOpen = false }}"
@@ -283,9 +291,15 @@ _openSidebar(event) {
 }
   connectedCallback() {
   super.connectedCallback()
-  window.addEventListener('pedigree:person-selected', this._selectPerson.bind(this))
-  window.addEventListener('pedigree:add-relative', this._addRelative.bind(this))
-  window.addEventListener('pedigree:open-sidebar', this._openSidebar.bind(this))  // ← NUEVO
+  window.addEventListener('pedigree:person-selected', this._onSelectPerson)
+  window.addEventListener('pedigree:add-relative', this._onAddRelative)
+  window.addEventListener('pedigree:open-sidebar', this._onOpenSidebar)
+}
+disconnectedCallback() {
+  window.removeEventListener('pedigree:person-selected', this._onSelectPerson)
+  window.removeEventListener('pedigree:add-relative', this._onAddRelative)
+  window.removeEventListener('pedigree:open-sidebar', this._onOpenSidebar)
+  super.disconnectedCallback()
 }
 
   update(changed) {
