@@ -111,6 +111,7 @@ export class GrampsjsPerson extends GrampsjsObject {
   static get properties() {
     return {
       homePersonDetails: {type: Object},
+      canEdit: {type: Boolean},
       _quickMeta: {type: Object, state: true},
       _savingQuickMeta: {type: Boolean, state: true},
       _quickMetaStatus: {type: String, state: true},
@@ -187,7 +188,7 @@ export class GrampsjsPerson extends GrampsjsObject {
   }
 
   async _saveQuickMeta() {
-    if (!this.canEdit || !this.data?.handle) return
+    if (!this.edit || !this.canEdit || !this.data?.handle) return
 
     this._savingQuickMeta = true
     this._quickMetaStatus = 'Guardando...'
@@ -272,13 +273,13 @@ export class GrampsjsPerson extends GrampsjsObject {
                 data-field=${field.key}
                 type=${field.inputType || 'text'}
                 .value=${this._quickMeta?.[field.key] || ''}
-                ?disabled=${!this.canEdit || this._savingQuickMeta}
+                ?disabled=${!this.edit || !this.canEdit || this._savingQuickMeta}
                 @input=${this._handleQuickMetaInput}
               />
             </div>
           `)}
         </div>
-        ${this.canEdit ? html`
+        ${this.edit && this.canEdit ? html`
           <div class="quick-meta-actions">
             <button
               class="quick-meta-save"
@@ -291,7 +292,7 @@ export class GrampsjsPerson extends GrampsjsObject {
           </div>
         ` : html`
           <div class="quick-meta-actions">
-            <span class="quick-meta-status">Solo lectura.</span>
+            <span class="quick-meta-status">Activa el modo edición para modificar estos campos.</span>
           </div>
         `}
       </div>
