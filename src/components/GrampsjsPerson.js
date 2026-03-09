@@ -11,12 +11,109 @@ import {fireEvent} from '../util.js'
 
 export class GrampsjsPerson extends GrampsjsObject {
   static get styles() {
-    return [super.styles, css``]
+    return [
+      super.styles,
+      css`
+        .quick-meta-card {
+          margin-top: 24px;
+          padding: 20px;
+          border: 1px solid var(--grampsjs-color-shade-250, #e5e7eb);
+          border-radius: 16px;
+          background: var(--grampsjs-color-shade-210, #fafafa);
+          max-width: 980px;
+        }
+
+        .quick-meta-title {
+          font-size: 20px;
+          font-weight: 700;
+          margin: 0 0 6px;
+        }
+
+        .quick-meta-subtitle {
+          margin: 0 0 18px;
+          color: var(--grampsjs-color-shade-110, #6b7280);
+          font-size: 14px;
+        }
+
+        .quick-meta-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+          gap: 14px;
+        }
+
+        .quick-meta-field {
+          display: flex;
+          flex-direction: column;
+          gap: 6px;
+        }
+
+        .quick-meta-field.wide {
+          grid-column: 1 / -1;
+        }
+
+        .quick-meta-field label {
+          font-size: 13px;
+          font-weight: 600;
+          color: var(--grampsjs-color-shade-090, #4b5563);
+        }
+
+        .quick-meta-field input {
+          height: 44px;
+          border-radius: 10px;
+          border: 1px solid var(--grampsjs-color-shade-250, #d1d5db);
+          padding: 0 14px;
+          font-size: 14px;
+          background: #fff;
+          box-sizing: border-box;
+        }
+
+        .quick-meta-field input:focus {
+          outline: none;
+          border-color: var(--mdc-theme-primary, #6d28d9);
+          box-shadow: 0 0 0 3px rgba(109, 40, 217, 0.12);
+        }
+
+        .quick-meta-actions {
+          margin-top: 16px;
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          flex-wrap: wrap;
+        }
+
+        .quick-meta-save {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          height: 42px;
+          padding: 0 18px;
+          border: none;
+          border-radius: 999px;
+          background: var(--mdc-theme-primary, #6d28d9);
+          color: #fff;
+          font-weight: 600;
+          cursor: pointer;
+        }
+
+        .quick-meta-save[disabled] {
+          opacity: 0.6;
+          cursor: not-allowed;
+        }
+
+        .quick-meta-status {
+          font-size: 13px;
+          color: var(--grampsjs-color-shade-090, #4b5563);
+        }
+      `,
+    ]
   }
 
   static get properties() {
     return {
       homePersonDetails: {type: Object},
+      _quickMeta: {type: Object, state: true},
+      _savingQuickMeta: {type: Boolean, state: true},
+      _quickMetaStatus: {type: String, state: true},
     }
   }
 
@@ -28,6 +125,177 @@ export class GrampsjsPerson extends GrampsjsObject {
     this._objectIcon = 'person'
     this._showReferences = false
     this._showPersonTimeline = true
+    this._quickMeta = this._emptyQuickMeta()
+    this._savingQuickMeta = false
+    this._quickMetaStatus = ''
+  }
+
+  updated(changedProperties) {
+    super.updated?.(changedProperties)
+    if (changedProperties.has('data') && this.data?.handle) {
+      this._quickMeta = this._readQuickMetaFromData(this.data)
+      this._quickMetaStatus = ''
+    }
+  }
+
+  _quickMetaFields() {
+    return [
+      {key: 'birthCountry', label: 'País de nacimiento', type: 'País de Nacimiento'},
+      {key: 'age', label: 'Edad', type: 'Edad'},
+      {key: 'email', label: 'Correo', type: 'Correo', inputType: 'email'},
+      {key: 'phone', label: 'Número de teléfono', type: 'Número de teléfono'},
+      {key: 'address', label: 'Dirección actual', type: 'Dirección Actual', wide: true},
+    ]
+  }
+
+  _emptyQuickMeta() {
+    return {
+      birthCountry: '',
+      age: '',
+      email: '',
+      phone: '',
+      address: '',
+    }
+  }
+
+  _getAttributeValueByType(type, data = this.data) {
+    const attrs = data?.attribute_list || []
+    const found = attrs.find(attr => {
+      const attrType = typeof attr.type === 'string' ? attr.type : attr.type?.string
+      return attrType === type
+    })
+    return found?.value || ''
+  }
+
+  _readQuickMetaFromData(data) {
+    return {
+      birthCountry: this._getAttributeValueByType('País de Nacimiento', data),
+      age: this._getAttributeValueByType('Edad', data),
+      email: this._getAttributeValueByType('Correo', data),
+      phone: this._getAttributeValueByType('Número de teléfono', data),
+      address: this._getAttributeValueByType('Dirección Actual', data),
+    }
+  }
+
+  _handleQuickMetaInput(e) {
+    const {field} = e.currentTarget.dataset
+    this._quickMeta = {
+      ...this._quickMeta,
+      [field]: e.currentTarget.value,
+    }
+    this._quickMetaStatus = ''
+  }
+
+  async _saveQuickMeta() {
+    if (!this.canEdit || !this.data?.handle) return
+
+    this._savingQuickMeta = true
+    this._quickMetaStatus = 'Guardando...'
+
+    try {
+      const current = await this.appState.apiGet(`/api/people/${this.data.handle}`)
+      if ('error' in current) {
+        fireEvent(this, 'grampsjs:error', {message: current.error})
+        this._quickMetaStatus = 'No se pudo cargar la persona.'
+        this._savingQuickMeta = false
+        return
+      }
+
+      const personData = current.data ?? {}
+      const existingAttrs = [...(personData.attribute_list || [])]
+
+      this._quickMetaFields().forEach(field => {
+        const idx = existingAttrs.findIndex(attr => {
+          const attrType = typeof attr.type === 'string' ? attr.type : attr.type?.string
+          return attrType === field.type
+        })
+
+        const value = (this._quickMeta[field.key] || '').trim()
+
+        if (value) {
+          const nextAttr = {
+            ...(idx >= 0 ? existingAttrs[idx] : {}),
+            type: field.type,
+            value,
+          }
+          if (idx >= 0) {
+            existingAttrs[idx] = nextAttr
+          } else {
+            existingAttrs.push(nextAttr)
+          }
+        } else if (idx >= 0) {
+          existingAttrs.splice(idx, 1)
+        }
+      })
+
+      const payload = {
+        ...personData,
+        _class: 'Person',
+        attribute_list: existingAttrs,
+      }
+
+      const result = await this.appState.apiPut(`/api/people/${this.data.handle}`, payload)
+
+      if ('error' in result) {
+        fireEvent(this, 'grampsjs:error', {message: result.error})
+        this._quickMetaStatus = 'No se pudo guardar.'
+        this._savingQuickMeta = false
+        return
+      }
+
+      this.data = {
+        ...this.data,
+        attribute_list: existingAttrs,
+      }
+      this._quickMeta = this._readQuickMetaFromData(this.data)
+      this._quickMetaStatus = 'Guardado correctamente.'
+      fireEvent(this, 'grampsjs:notification', {message: 'Metadatos guardados correctamente.'})
+    } catch (err) {
+      fireEvent(this, 'grampsjs:error', {message: err?.message || 'Error guardando metadatos.'})
+      this._quickMetaStatus = 'Ocurrió un error al guardar.'
+    }
+
+    this._savingQuickMeta = false
+  }
+
+  _renderQuickMetaForm() {
+    return html`
+      <div class="quick-meta-card">
+        <h3 class="quick-meta-title">Información rápida</h3>
+        <p class="quick-meta-subtitle">Edita estos datos sin entrar al bloque técnico de Metadatos.</p>
+        <div class="quick-meta-grid">
+          ${this._quickMetaFields().map(field => html`
+            <div class="quick-meta-field ${field.wide ? 'wide' : ''}">
+              <label for=${`quick-meta-${field.key}`}>${field.label}</label>
+              <input
+                id=${`quick-meta-${field.key}`}
+                data-field=${field.key}
+                type=${field.inputType || 'text'}
+                .value=${this._quickMeta?.[field.key] || ''}
+                ?disabled=${!this.canEdit || this._savingQuickMeta}
+                @input=${this._handleQuickMetaInput}
+              />
+            </div>
+          `)}
+        </div>
+        ${this.canEdit ? html`
+          <div class="quick-meta-actions">
+            <button
+              class="quick-meta-save"
+              ?disabled=${this._savingQuickMeta}
+              @click=${this._saveQuickMeta}
+            >
+              ${this._savingQuickMeta ? 'Guardando...' : 'Guardar cambios'}
+            </button>
+            <span class="quick-meta-status">${this._quickMetaStatus || ''}</span>
+          </div>
+        ` : html`
+          <div class="quick-meta-actions">
+            <span class="quick-meta-status">Solo lectura.</span>
+          </div>
+        `}
+      </div>
+    `
   }
 
   renderProfile() {
@@ -44,6 +312,7 @@ export class GrampsjsPerson extends GrampsjsObject {
         ${this._renderTreeBtn()} ${this._renderDnaBtn()}
         ${this._renderExternalSearchBtn()}
       </p>
+      ${this._renderQuickMetaForm()}
     `
   }
 
