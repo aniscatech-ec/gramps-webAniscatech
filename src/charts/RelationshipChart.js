@@ -313,6 +313,14 @@ const clipString = (s, length) => {
 }
 
 function clicked(event, d) {
+  const svg = select(event.currentTarget.ownerSVGElement)
+  svg.selectAll('.personBox').attr('stroke', null).attr('stroke-width', null)
+
+  select(event.currentTarget)
+    .select('.personBox')
+    .attr('stroke', 'var(--grampsjs-color-primary, #6d28d9)')
+    .attr('stroke-width', 3)
+
   dispatchEvent(
     new CustomEvent('pedigree:person-selected', {
       bubbles: true,

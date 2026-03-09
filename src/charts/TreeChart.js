@@ -173,33 +173,27 @@ node
   .attr('class', 'person-card-rect')
 
   function clicked(event, d) {
-  // reset stroke a todas
-  svgParent.selectAll('.person-card-rect')
-    .attr('stroke', 'transparent')
-    .attr('stroke-width', 0);
+    svgParent
+      .selectAll('.person-card-rect')
+      .attr('stroke', 'transparent')
+      .attr('stroke-width', 0)
 
-  // stroke a la seleccionada
-  select(this).select('.person-card-rect')
-    .attr('stroke', 'var(--grampsjs-color-primary, #6d28d9)')
-    .attr('stroke-width', 3);
+    select(this)
+      .select('.person-card-rect')
+      .attr('stroke', 'var(--grampsjs-color-primary, #6d28d9)')
+      .attr('stroke-width', 3)
 
-  dispatchEvent(new CustomEvent('pedigree:person-selected', {
-    bubbles: true,
-    composed: true,
-    detail: { grampsId: d.data?.person?.gramps_id || d.data?.person?.grampsId }
-  }));
-}
+    dispatchEvent(
+      new CustomEvent('pedigree:person-selected', {
+        bubbles: true,
+        composed: true,
+        detail: {
+          grampsId: d.data?.person?.gramps_id || d.data?.person?.grampsId,
+        },
+      })
+    )
+  }
 
-  node
-    .append('rect')
-    .filter(d => d.data.person)
-    .attr('fill', 'var(--grampsjs-color-shade-230)')
-    .attr('width', boxWidth)
-    .attr('height', boxHeight)
-    .attr('rx', 8)
-    .attr('ry', 8)
-    .attr('transform', `translate(${-boxWidth / 2},${-boxHeight / 2})`)
-    .attr('id', d => d.data.id) // Unique id for each slice
 
   function triangleClicked(e) {
     chart.node().dispatchEvent(

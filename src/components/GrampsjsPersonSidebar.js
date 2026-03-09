@@ -24,7 +24,7 @@ export class GrampsjsPersonSidebar extends LitElement {
         width: 380px;
         height: 100vh;
         background: #fff;
-        box-shadow: -4px 0 20px rgba(0,0,0,0.15);
+        box-shadow: -4px 0 20px rgba(0, 0, 0, 0.15);
         transition: right 0.3s ease;
         z-index: 1000;
         overflow-y: auto;
@@ -66,7 +66,10 @@ export class GrampsjsPersonSidebar extends LitElement {
         line-height: 1;
         border-radius: 4px;
       }
-      .close-btn:hover { background: #f3f4f6; }
+
+      .close-btn:hover {
+        background: #f3f4f6;
+      }
 
       .person-header {
         padding: 24px 20px 16px;
@@ -153,29 +156,16 @@ export class GrampsjsPersonSidebar extends LitElement {
         border: none;
         margin: 16px 20px;
       }
-      .person-link:hover { background: #1d4ed8; }
+
+      .person-link:hover {
+        background: #1d4ed8;
+      }
 
       .loading {
         padding: 40px 20px;
         text-align: center;
         color: #9ca3af;
       }
-
-      .relation-chip {
-        display: inline-flex;
-        align-items: center;
-        gap: 4px;
-        padding: 3px 8px;
-        border-radius: 12px;
-        font-size: 12px;
-        margin: 2px;
-        cursor: pointer;
-        text-decoration: none;
-        background: #f3f4f6;
-        color: #374151;
-        border: none;
-      }
-      .relation-chip:hover { background: #e5e7eb; }
     `
   }
 
@@ -188,78 +178,87 @@ export class GrampsjsPersonSidebar extends LitElement {
   }
 
   updated(changedProps) {
-    if (changedProps.has('grampsId') && this.grampsId) {
-      this._fetchPerson()
+    if (changedProps.has('grampsId')) {
+      if (this.grampsId) {
+        this._fetchPerson()
+      } else {
+        this._personData = null
+        this._loading = false
+      }
     }
   }
 
   async _fetchPerson() {
-  this._loading = true
-  this._personData = null
+    this._loading = true
+    this._personData = null
 
-  try {
-    const resp = await apiGet(`/api/people/?gramps_id=${this.grampsId}&extend=all`)
+    try {
+      const resp = await apiGet(`/api/people/?gramps_id=${this.grampsId}&extend=all`)
 
-    if (!resp || resp.error) {
-      console.error('Error fetching person:', resp?.error)
+      if (!resp || resp.error) {
+        console.error('Error fetching person:', resp?.error)
+        return
+      }
+
+      const payload = resp.data
+      const list = Array.isArray(payload)
+        ? payload
+        : Array.isArray(payload?.data)
+          ? payload.data
+          : Array.isArray(payload?.results)
+            ? payload.results
+            : []
+
+      if (list.length > 0) {
+        this._personData = list[0]
+      }
+    } catch (e) {
+      console.error('Error fetching person:', e)
+    } finally {
       this._loading = false
-      return
     }
-
-    const payload = resp.data
-
-    const list =
-      Array.isArray(payload) ? payload :
-      Array.isArray(payload?.data) ? payload.data :
-      Array.isArray(payload?.results) ? payload.results :
-      []
-
-    if (list.length > 0) {
-      this._personData = list[0]
-    }
-  } catch (e) {
-    console.error('Error fetching person:', e)
   }
-
-  this._loading = false
-}
-
-_goToProfile() {
-  const id = this._personData?.gramps_id || this.grampsId
-  if (!id) return
-  window.location.href = `/person/${id}`
-}
 
   _getFullName(person) {
     if (!person?.primary_name) return 'Sin nombre'
     const {first_name, surname_list} = person.primary_name
     const surname = surname_list?.[0]?.surname || ''
-    return `${first_name} ${surname}`.trim()
+    return `${first_name || ''} ${surname}`.trim()
   }
 
   _getInitials(person) {
     const name = this._getFullName(person)
-    return name.split(' ').slice(0,2).map(n => n[0]).join('').toUpperCase()
+    return name
+      .split(' ')
+      .filter(Boolean)
+      .slice(0, 2)
+      .map(n => n[0])
+      .join('')
+      .toUpperCase()
   }
 
   _formatDate(dateObj) {
     if (!dateObj?.dateval) return ''
     const [y, m, d] = dateObj.dateval
     if (!y) return ''
-    if (m && d) return `${d.toString().padStart(2,'0')}/${m.toString().padStart(2,'0')}/${y}`
+    if (m && d) {
+      return `${d.toString().padStart(2, '0')}/${m.toString().padStart(2, '0')}/${y}`
+    }
     return y.toString()
   }
 
   _close() {
     this.open = false
-    this.dispatchEvent(new CustomEvent('sidebar-closed', {bubbles: true, composed: true}))
+    this.dispatchEvent(
+      new CustomEvent('sidebar-closed', {bubbles: true, composed: true})
+    )
   }
 
   _goToProfile() {
-  const id = this._personData?.gramps_id || this.grampsId
-  if (!id) return
-  window.location.href = `/person/${id}`
-}
+    const id = this._personData?.gramps_id || this.grampsId
+    if (!id) return
+    window.location.assign(`/person/${id}`)
+  }
 
   render() {
     return html`
@@ -269,11 +268,11 @@ _goToProfile() {
           <button class="close-btn" @click=${this._close}>✕</button>
         </div>
 
-        ${this._loading ? html`
-          <div class="loading">Cargando...</div>
-        ` : this._personData ? this._renderPerson() : html`
-          <div class="loading">Selecciona una persona en el árbol</div>
-        `}
+        ${this._loading
+          ? html`<div class="loading">Cargando...</div>`
+          : this._personData
+            ? this._renderPerson()
+            : html`<div class="loading">Selecciona una persona en el árbol</div>`}
       </div>
     `
   }
@@ -283,7 +282,6 @@ _goToProfile() {
     const fullName = this._getFullName(p)
     const initials = this._getInitials(p)
 
-    // Eventos de nacimiento y muerte
     const birthEvent = p.extended?.events?.find(e => e.type === 'Birth')
     const deathEvent = p.extended?.events?.find(e => e.type === 'Death')
     const birthDate = this._formatDate(birthEvent?.date)
@@ -291,23 +289,16 @@ _goToProfile() {
     const birthPlace = birthEvent?.extended?.place?.name?.value || ''
     const deathPlace = deathEvent?.extended?.place?.name?.value || ''
 
-    // Foto principal
     const mediaRef = p.media_list?.[0]
     const mediaHandle = mediaRef?.ref
     const mediaUrl = mediaHandle ? `/api/media/${mediaHandle}/thumbnail/200` : null
-
-    // Padres
-    const parents = p.extended?.families?.filter(f =>
-      f.father_handle === p.handle || f.mother_handle === p.handle
-    ) || []
 
     return html`
       <div class="person-header">
         <div class="person-avatar">
           ${mediaUrl
-            ? html`<img src="${mediaUrl}" alt="${fullName}">`
-            : initials
-          }
+            ? html`<img src="${mediaUrl}" alt="${fullName}" />`
+            : initials}
         </div>
         <div>
           <div class="person-name">${fullName}</div>
@@ -318,43 +309,59 @@ _goToProfile() {
         </div>
       </div>
 
-      ${birthDate || birthPlace ? html`
-        <div class="section">
-          <div class="section-label">Nacimiento</div>
-          ${birthDate ? html`
-            <div class="info-row">
-              <span class="info-icon">📅</span>
-              <span>${birthDate}</span>
-            </div>` : ''}
-          ${birthPlace ? html`
-            <div class="info-row">
-              <span class="info-icon">📍</span>
-              <span>${birthPlace}</span>
-            </div>` : ''}
-        </div>
-      ` : ''}
+      ${birthDate || birthPlace
+        ? html`
+            <div class="section">
+              <div class="section-label">Nacimiento</div>
+              ${birthDate
+                ? html`
+                    <div class="info-row">
+                      <span class="info-icon">📅</span>
+                      <span>${birthDate}</span>
+                    </div>
+                  `
+                : ''}
+              ${birthPlace
+                ? html`
+                    <div class="info-row">
+                      <span class="info-icon">📍</span>
+                      <span>${birthPlace}</span>
+                    </div>
+                  `
+                : ''}
+            </div>
+          `
+        : ''}
 
-      ${deathDate || deathPlace ? html`
-        <div class="section">
-          <div class="section-label">Fallecimiento</div>
-          ${deathDate ? html`
-            <div class="info-row">
-              <span class="info-icon">📅</span>
-              <span>${deathDate}</span>
-            </div>` : ''}
-          ${deathPlace ? html`
-            <div class="info-row">
-              <span class="info-icon">📍</span>
-              <span>${deathPlace}</span>
-            </div>` : ''}
-        </div>
-      ` : ''}
+      ${deathDate || deathPlace
+        ? html`
+            <div class="section">
+              <div class="section-label">Fallecimiento</div>
+              ${deathDate
+                ? html`
+                    <div class="info-row">
+                      <span class="info-icon">📅</span>
+                      <span>${deathDate}</span>
+                    </div>
+                  `
+                : ''}
+              ${deathPlace
+                ? html`
+                    <div class="info-row">
+                      <span class="info-icon">📍</span>
+                      <span>${deathPlace}</span>
+                    </div>
+                  `
+                : ''}
+            </div>
+          `
+        : ''}
 
       <div class="section">
         <div class="section-label">ID en árbol</div>
         <div class="info-row">
           <span class="info-icon">🆔</span>
-          <span>${p.gramps_id}</span>
+          <span>${p.gramps_id || ''}</span>
         </div>
       </div>
 

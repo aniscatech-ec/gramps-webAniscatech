@@ -25,39 +25,39 @@ export class GrampsjsViewTree extends GrampsjsView {
     return [
       super.styles,
       css`
-  .with-margin {
-    margin: 25px 40px;
-  }
+        .with-margin {
+          margin: 25px 40px;
+        }
 
-  md-primary-tab {
-    opacity: 0.8;
-  }
+        md-primary-tab {
+          opacity: 0.8;
+        }
 
-  md-primary-tab[active] {
-    opacity: 1;
-  }
+        md-primary-tab[active] {
+          opacity: 1;
+        }
 
-  #tabs {
-    height: 85px;
-  }
+        #tabs {
+          height: 85px;
+        }
 
-  .tree-wrapper {
-    display: flex;
-    height: 100%;
-    position: relative;
-    overflow: hidden;
-  }
+        .tree-wrapper {
+          display: flex;
+          height: 100%;
+          position: relative;
+          overflow: hidden;
+        }
 
-  .tree-content {
-    flex: 1;
-    overflow: hidden;
-    transition: margin-right 0.3s ease;
-  }
+        .tree-content {
+          flex: 1;
+          overflow: hidden;
+          transition: margin-right 0.3s ease;
+        }
 
-  .tree-content.sidebar-open {
-    margin-right: 380px;
-  }
-`
+        .tree-content.sidebar-open {
+          margin-right: 380px;
+        }
+      `,
     ]
   }
 
@@ -69,24 +69,23 @@ export class GrampsjsViewTree extends GrampsjsView {
       _history: {type: Array},
       _currentTabId: {type: Number},
       _selectedPersonId: {type: String},
-    _sidebarOpen: {type: Boolean},
+      _sidebarOpen: {type: Boolean},
     }
   }
 
   constructor() {
-  super()
-  this.grampsId = ''
-  this.view = 'ancestor'
-  this._history = this.grampsId ? [this.grampsId] : []
-  this._currentTabId = 0
-  this._selectedPersonId = ''
-  this._sidebarOpen = false
+    super()
+    this.grampsId = ''
+    this.view = 'ancestor'
+    this._history = this.grampsId ? [this.grampsId] : []
+    this._currentTabId = 0
+    this._selectedPersonId = ''
+    this._sidebarOpen = false
 
-  // bind una sola vez
-  this._onSelectPerson = this._selectPerson.bind(this)
-  this._onAddRelative = this._addRelative.bind(this)
-  this._onOpenSidebar = this._openSidebar.bind(this)
-}
+    this._onSelectPerson = this._selectPerson.bind(this)
+    this._onAddRelative = this._addRelative.bind(this)
+    this._onOpenSidebar = this._openSidebar.bind(this)
+  }
 
   renderContent() {
     if (this.grampsId === '') {
@@ -100,88 +99,49 @@ export class GrampsjsViewTree extends GrampsjsView {
       `
     }
     return html`
-    <div class="tree-wrapper">
-      <div class="tree-content ${this._sidebarOpen ? 'sidebar-open' : ''}">
-        <div id="tabs">${this.renderTabs()}</div>
-        ${this._currentTabId === 0 ? this._renderPedigree() : ''}
-        ${this._currentTabId === 1 ? this._renderDescendantTree() : ''}
-        ${this._currentTabId === 2 ? this._renderHourglassTree() : ''}
-        ${this._currentTabId === 3 ? this._renderRelationshipChart() : ''}
-        ${this._currentTabId === 4 ? this._renderFan() : ''}
-      </div>
+      <div class="tree-wrapper">
+        <div class="tree-content ${this._sidebarOpen ? 'sidebar-open' : ''}">
+          <div id="tabs">${this.renderTabs()}</div>
+          ${this._currentTabId === 0 ? this._renderPedigree() : ''}
+          ${this._currentTabId === 1 ? this._renderDescendantTree() : ''}
+          ${this._currentTabId === 2 ? this._renderHourglassTree() : ''}
+          ${this._currentTabId === 3 ? this._renderRelationshipChart() : ''}
+          ${this._currentTabId === 4 ? this._renderFan() : ''}
+        </div>
 
-      <grampsjs-person-sidebar
-        .grampsId="${this._selectedPersonId}"
-        .open="${this._sidebarOpen}"
-        @sidebar-closed="${() => { this._sidebarOpen = false }}"
-      ></grampsjs-person-sidebar>
-    </div>
-  `
-}
+        <grampsjs-person-sidebar
+          .grampsId=${this._selectedPersonId}
+          .open=${this._sidebarOpen}
+          @sidebar-closed=${() => {
+            this._sidebarOpen = false
+          }}
+        ></grampsjs-person-sidebar>
+      </div>
+    `
+  }
 
   renderTabs() {
     return html`
       <md-tabs .activeTabIndex=${this._currentTabId}>
-        <md-primary-tab
-          @click=${() => {
-            this._currentTabId = 0
-          }}
-          has-icon
-          >${this._('Ancestor Tree')}
-          <span slot="icon"
-            >${renderIconSvg(
-              mdiFamilyTree,
-              '--md-sys-color-primary',
-              -90
-            )}</span
-          >
+        <md-primary-tab @click=${() => { this._currentTabId = 0 }} has-icon>
+          ${this._('Ancestor Tree')}
+          <span slot="icon">${renderIconSvg(mdiFamilyTree, '--md-sys-color-primary', -90)}</span>
         </md-primary-tab>
-        <md-primary-tab
-          @click=${() => {
-            this._currentTabId = 1
-          }}
-          has-icon
-        >
+        <md-primary-tab @click=${() => { this._currentTabId = 1 }} has-icon>
           ${this._('Descendant Tree')}
-          <span slot="icon"
-            >${renderIconSvg(mdiFamilyTree, '--md-sys-color-primary', 90)}</span
-          >
+          <span slot="icon">${renderIconSvg(mdiFamilyTree, '--md-sys-color-primary', 90)}</span>
         </md-primary-tab>
-        <md-primary-tab
-          @click=${() => {
-            this._currentTabId = 2
-          }}
-          has-icon
-        >
+        <md-primary-tab @click=${() => { this._currentTabId = 2 }} has-icon>
           ${this._('Hourglass Graph')}
-          <span slot="icon"
-            >${renderIconSvg(hourglassIconPath, '--md-sys-color-primary')}</span
-          >
+          <span slot="icon">${renderIconSvg(hourglassIconPath, '--md-sys-color-primary')}</span>
         </md-primary-tab>
-        <md-primary-tab
-          @click=${() => {
-            this._currentTabId = 3
-          }}
-          has-icon
-        >
+        <md-primary-tab @click=${() => { this._currentTabId = 3 }} has-icon>
           ${this._('Relationship Graph')}
-          <span slot="icon"
-            >${renderIconSvg(
-              relationshipGraphIconPath,
-              '--md-sys-color-primary'
-            )}</span
-          >
+          <span slot="icon">${renderIconSvg(relationshipGraphIconPath, '--md-sys-color-primary')}</span>
         </md-primary-tab>
-        <md-primary-tab
-          @click=${() => {
-            this._currentTabId = 4
-          }}
-          has-icon
-        >
+        <md-primary-tab @click=${() => { this._currentTabId = 4 }} has-icon>
           ${this._('Fan Chart')}
-          <span slot="icon"
-            >${renderIconSvg(chartFanIconPath, '--md-sys-color-primary')}</span
-          >
+          <span slot="icon">${renderIconSvg(chartFanIconPath, '--md-sys-color-primary')}</span>
         </md-primary-tab>
       </md-tabs>
     `
@@ -190,88 +150,84 @@ export class GrampsjsViewTree extends GrampsjsView {
   _renderFan() {
     return html`
       <grampsjs-view-fan-chart
-        @tree:back="${this._prevPerson}"
-        @tree:person="${this._goToPerson}"
-        @tree:home="${this._backToHomePerson}"
+        @tree:back=${this._prevPerson}
+        @tree:person=${this._goToPerson}
+        @tree:home=${this._backToHomePerson}
         grampsId=${this.grampsId}
         ?active=${this.active}
-        .appState="${this.appState}"
+        .appState=${this.appState}
         .settings=${this.settings}
         ?disableBack=${this._history.length < 2}
         ?disableHome=${this.grampsId === this.settings.homePerson}
-      >
-      </grampsjs-view-fan-chart>
+      ></grampsjs-view-fan-chart>
     `
   }
 
   _renderRelationshipChart() {
     return html`
       <grampsjs-view-relationship-chart
-        @tree:back="${this._prevPerson}"
-        @tree:person="${this._goToPerson}"
-        @tree:home="${this._backToHomePerson}"
+        @tree:back=${this._prevPerson}
+        @tree:person=${this._goToPerson}
+        @tree:home=${this._backToHomePerson}
         grampsId=${this.grampsId}
         ?active=${this.active}
-        .appState="${this.appState}"
+        .appState=${this.appState}
         .settings=${this.settings}
         ?disableBack=${this._history.length < 2}
         ?disableHome=${this.grampsId === this.settings.homePerson}
-      >
-      </grampsjs-view-relationship-chart>
+      ></grampsjs-view-relationship-chart>
     `
   }
 
   _renderPedigree() {
     return html`
       <grampsjs-view-tree-chart
-        @tree:back="${this._prevPerson}"
-        @tree:person="${this._goToPerson}"
-        @tree:home="${this._backToHomePerson}"
+        @tree:back=${this._prevPerson}
+        @tree:person=${this._goToPerson}
+        @tree:home=${this._backToHomePerson}
         grampsId=${this.grampsId}
         ?active=${this.active}
-        .appState="${this.appState}"
+        .appState=${this.appState}
         .settings=${this.settings}
         ?disableBack=${this._history.length < 2}
         ?disableHome=${this.grampsId === this.settings.homePerson}
-      >
-      </grampsjs-view-tree-chart>
+      ></grampsjs-view-tree-chart>
     `
   }
 
   _renderDescendantTree() {
     return html`
       <grampsjs-view-descendant-chart
-        @tree:back="${this._prevPerson}"
-        @tree:person="${this._goToPerson}"
-        @tree:home="${this._backToHomePerson}"
+        @tree:back=${this._prevPerson}
+        @tree:person=${this._goToPerson}
+        @tree:home=${this._backToHomePerson}
         grampsId=${this.grampsId}
         ?active=${this.active}
-        .appState="${this.appState}"
+        .appState=${this.appState}
         .settings=${this.settings}
         ?disableBack=${this._history.length < 2}
         ?disableHome=${this.grampsId === this.settings.homePerson}
-      >
-      </grampsjs-view-descendant-chart>
+      ></grampsjs-view-descendant-chart>
     `
   }
 
   _renderHourglassTree() {
     return html`
       <grampsjs-view-hourglass-chart
-        @tree:back="${this._prevPerson}"
-        @tree:person="${this._goToPerson}"
-        @tree:home="${this._backToHomePerson}"
+        @tree:back=${this._prevPerson}
+        @tree:person=${this._goToPerson}
+        @tree:home=${this._backToHomePerson}
         grampsId=${this.grampsId}
         ?active=${this.active}
-        .appState="${this.appState}"
+        .appState=${this.appState}
         .settings=${this.settings}
         ?disableBack=${this._history.length < 2}
         ?disableHome=${this.grampsId === this.settings.homePerson}
-      >
-      </grampsjs-view-hourglass-chart>
+      ></grampsjs-view-hourglass-chart>
     `
   }
-    _prevPerson() {
+
+  _prevPerson() {
     this._history.pop()
     this.grampsId = this._history.pop()
   }
@@ -283,44 +239,48 @@ export class GrampsjsViewTree extends GrampsjsView {
   _goToPerson() {
     fireEvent(this, 'nav', {path: `person/${this.grampsId}`})
   }
-_openSidebar(event) {
-  const {grampsId} = event.detail || {}
-  if (!grampsId) return
-  this._selectedPersonId = grampsId
-  this._sidebarOpen = true
-}
+
+  _openSidebar(event) {
+    const {grampsId} = event.detail || {}
+    if (!grampsId) return
+    this._selectedPersonId = grampsId
+    this._sidebarOpen = true
+  }
+
   connectedCallback() {
-  super.connectedCallback()
-  window.addEventListener('pedigree:person-selected', this._onSelectPerson)
-  window.addEventListener('pedigree:add-relative', this._onAddRelative)
-  window.addEventListener('pedigree:open-sidebar', this._onOpenSidebar)
-}
-disconnectedCallback() {
-  window.removeEventListener('pedigree:person-selected', this._onSelectPerson)
-  window.removeEventListener('pedigree:add-relative', this._onAddRelative)
-  window.removeEventListener('pedigree:open-sidebar', this._onOpenSidebar)
-  super.disconnectedCallback()
-}
+    super.connectedCallback()
+    window.addEventListener('pedigree:person-selected', this._onSelectPerson)
+    window.addEventListener('pedigree:add-relative', this._onAddRelative)
+    window.addEventListener('pedigree:open-sidebar', this._onOpenSidebar)
+  }
+
+  disconnectedCallback() {
+    window.removeEventListener('pedigree:person-selected', this._onSelectPerson)
+    window.removeEventListener('pedigree:add-relative', this._onAddRelative)
+    window.removeEventListener('pedigree:open-sidebar', this._onOpenSidebar)
+    super.disconnectedCallback()
+  }
 
   update(changed) {
     super.update(changed)
     if (changed.has('grampsId')) {
       this._history.push(this.grampsId)
-      // limit history to 100 people
       this._history = this._history.slice(-100)
     }
   }
 
-  async _selectPerson(event) {
-    const {grampsId} = event.detail
-    this.grampsId = grampsId
+  _selectPerson(event) {
+    const {grampsId} = event.detail || {}
+    if (!grampsId) return
+    this._selectedPersonId = grampsId
+    this._sidebarOpen = true
   }
-  _addRelative(event) {
-  const { grampsId } = event.detail || {}
-  if (!grampsId) return
-  fireEvent(this, 'nav', { path: `new_family?from=${encodeURIComponent(grampsId)}` })
-}
 
+  _addRelative(event) {
+    const {grampsId} = event.detail || {}
+    if (!grampsId) return
+    fireEvent(this, 'nav', {path: `new_family?from=${encodeURIComponent(grampsId)}`})
+  }
 }
 
 window.customElements.define('grampsjs-view-tree', GrampsjsViewTree)
