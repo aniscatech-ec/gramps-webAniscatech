@@ -182,7 +182,7 @@ class GrampsjsLogin extends GrampsjsAppStateMixin(LitElement) {
     return html`
       <div id="login-container">
         <form id="login-form" @keydown="${this._handleLoginKey}">
-          <h2>${this._('Log in to Gramps Web')}</h2>
+          <h2>${this._('Log in to Raíces Familiares')}</h2>
           ${localAuthDisabled
             ? ''
             : html`
